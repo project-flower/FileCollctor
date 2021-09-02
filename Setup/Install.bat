@@ -6,9 +6,9 @@
 @SET REG_DIRECTORY_BACKGROUND_SHELL=HKCU\Software\Classes\Directory\Background\shell
 @SET REG_DRIVE_SHELL=HKCU\Software\Classes\Drive\shell
 @SET COMMANDNAME=FileCollector
-@CALL :AddShellCommand %REG_DIRECTORY_SHELL%\FileCollector "%COMMANDNAME%" "\"%%%%1\""
-@CALL :AddShellCommand %REG_DIRECTORY_BACKGROUND_SHELL%\FileCollector "%COMMANDNAME%" "\"%%%%V\""
-@CALL :AddShellCommand %REG_DRIVE_SHELL%\FileCollector "%COMMANDNAME%" "%%%%1"
+@CALL :AddShellCommand %REG_DIRECTORY_SHELL%\FileCollector "%COMMANDNAME%" "\"/d:%%%%1\""
+@CALL :AddShellCommand %REG_DIRECTORY_BACKGROUND_SHELL%\FileCollector "%COMMANDNAME%" "\"/d:%%%%V\""
+@CALL :AddShellCommand %REG_DRIVE_SHELL%\FileCollector "%COMMANDNAME%" "/d:%%%%1"
 @PAUSE
 @EXIT /B
 

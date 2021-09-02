@@ -39,7 +39,19 @@ namespace FileCollector
 
         private void BeginCollect()
         {
-            var options = new MainEngine.Options()
+            var options = GetCurrentOptions();
+            SetEnabled(false);
+            backgroundWorker.RunWorkerAsync(options);
+        }
+
+        private void CancelCollect()
+        {
+            MainEngine.CancellationRequired = true;
+        }
+
+        private MainEngine.Options GetCurrentOptions()
+        {
+            return new MainEngine.Options()
             {
                 Destination = comboBoxDestination.Text,
                 DirectoryTree = checkBoxDirectoryTree.Checked,
@@ -48,14 +60,6 @@ namespace FileCollector
                 RegExpression = checkBoxRegExpression.Checked,
                 Source = comboBoxSource.Text
             };
-
-            SetEnabled(false);
-            backgroundWorker.RunWorkerAsync(options);
-        }
-
-        private void CancelCollect()
-        {
-            MainEngine.CancellationRequired = true;
         }
 
         private void SetEnabled(bool enabled)
@@ -160,10 +164,18 @@ namespace FileCollector
         {
             var args = Environment.GetCommandLineArgs();
 
-            if (args.Length > 1)
+            if ((args == null) || (args.Length < 2))
             {
-                comboBoxDestination.Text = args[1];
+                return;
             }
+
+            string[] args_ = new string[args.Length - 1];
+            Array.Copy(args, 1, args_, 0, args_.Length);
+            var options = GetCurrentOptions();
+            CommandLineArgsAnalyzer.Analyze(args_, ref options);
+            comboBoxSource.Text = options.Source;
+            comboBoxFilter.Text = options.Filter;
+            comboBoxDestination.Text = options.Destination;
         }
     }
 }
