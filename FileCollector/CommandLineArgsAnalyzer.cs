@@ -10,6 +10,7 @@ namespace FileCollector
         {
             foreach (string arg in commandLineArgs)
             {
+                if (GetOption(arg, ref options)) continue;
                 if (GetOption('d', arg, ref options.Destination)) continue;
                 if (GetOption('f', arg, ref options.Filter)) continue;
                 if (GetOption('s', arg, ref options.Source)) continue;
@@ -40,6 +41,33 @@ namespace FileCollector
             }
 
             return false;
+        }
+
+        private static bool GetOption(string argument, ref MainEngine.Options options)
+        {
+            Match match = Regex.Match(argument, "^/(?<value>\\w)$");
+
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            switch (match.Groups["value"].Value.ToLower())
+            {
+                case "e":
+                    options.RegExpression = true;
+                    break;
+                case "r":
+                    options.Recursive = true;
+                    break;
+                case "t":
+                    options.DirectoryTree = true;
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
         }
 
         #endregion

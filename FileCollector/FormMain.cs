@@ -37,6 +37,16 @@ namespace FileCollector
 
         #region Private Methods
 
+        private void ApplyOptions(MainEngine.Options options)
+        {
+            comboBoxSource.Text = options.Source;
+            checkBoxRecursive.Checked = options.Recursive;
+            comboBoxFilter.Text = options.Filter;
+            checkBoxRegExpression.Checked = options.RegExpression;
+            comboBoxDestination.Text = options.Destination;
+            checkBoxDirectoryTree.Checked = options.DirectoryTree;
+        }
+
         private void BeginCollect()
         {
             var options = GetCurrentOptions();
@@ -173,9 +183,7 @@ namespace FileCollector
             Array.Copy(args, 1, args_, 0, args_.Length);
             var options = GetCurrentOptions();
             CommandLineArgsAnalyzer.Analyze(args_, ref options);
-            comboBoxSource.Text = options.Source;
-            comboBoxFilter.Text = options.Filter;
-            comboBoxDestination.Text = options.Destination;
+            ApplyOptions(options);
         }
     }
 }
