@@ -27,7 +27,7 @@ namespace FileCollector
 
             try
             {
-                match = new Regex($"^/{key}:(?<value>.+)", RegexOptions.IgnoreCase).Match(value);
+                match = Regex.Match(value, $"^/{key}:(?<value>.+)", RegexOptions.IgnoreCase);
             }
             catch
             {
