@@ -93,6 +93,7 @@ namespace FileCollector
 
         private DialogResult ShowMessage(string text, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
+            Activate();
             return MessageBox.Show(this, text, Text, buttons, icon);
         }
 
