@@ -8,6 +8,9 @@
     <Setting Name="DirectoryTree" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="Encoding" Type="System.String" Scope="User">
+      <Value Profile="(Default)">utf-8</Value>
+    </Setting>
     <Setting Name="Filter" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

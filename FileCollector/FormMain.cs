@@ -12,7 +12,10 @@ namespace FileCollector
 
         private const string buttonAbortText = "&Abort";
         private readonly string buttonCollectText;
+        private string encoding;
         private string errorMessage = string.Empty;
+        private bool exitRequired = false;
+        private readonly MainEngine mainEngine = new MainEngine();
 
         #endregion
 
@@ -31,6 +34,7 @@ namespace FileCollector
             comboBoxDestination.Text = settings.Destination;
             checkBoxDirectoryTree.Checked = settings.DirectoryTree;
             buttonCollectText = buttonCollect.Text;
+            encoding = settings.Encoding;
         }
 
         #endregion
@@ -42,6 +46,7 @@ namespace FileCollector
             comboBoxSource.Text = options.Source;
             checkBoxRecursive.Checked = options.Recursive;
             comboBoxFilter.Text = options.Filter;
+            encoding = options.Encoding;
             checkBoxRegExpression.Checked = options.RegExpression;
             comboBoxDestination.Text = options.Destination;
             checkBoxDirectoryTree.Checked = options.DirectoryTree;
@@ -50,29 +55,16 @@ namespace FileCollector
         private void BeginCollect()
         {
             var options = GetCurrentOptions();
-            SetEnabled(false);
+            EnableControls(false);
             backgroundWorker.RunWorkerAsync(options);
         }
 
         private void CancelCollect()
         {
-            MainEngine.CancellationRequired = true;
+            mainEngine.CancellationRequired = true;
         }
 
-        private MainEngine.Options GetCurrentOptions()
-        {
-            return new MainEngine.Options()
-            {
-                Destination = comboBoxDestination.Text,
-                DirectoryTree = checkBoxDirectoryTree.Checked,
-                Filter = comboBoxFilter.Text,
-                Recursive = checkBoxRecursive.Checked,
-                RegExpression = checkBoxRegExpression.Checked,
-                Source = comboBoxSource.Text
-            };
-        }
-
-        private void SetEnabled(bool enabled)
+        private void EnableControls(bool enabled)
         {
             foreach (Control control in Controls)
             {
@@ -84,6 +76,20 @@ namespace FileCollector
 
                 control.Enabled = enabled;
             }
+        }
+
+        private MainEngine.Options GetCurrentOptions()
+        {
+            return new MainEngine.Options()
+            {
+                Destination = comboBoxDestination.Text,
+                DirectoryTree = checkBoxDirectoryTree.Checked,
+                Encoding = encoding,
+                Filter = comboBoxFilter.Text,
+                Recursive = checkBoxRecursive.Checked,
+                RegExpression = checkBoxRegExpression.Checked,
+                Source = comboBoxSource.Text
+            };
         }
 
         private void ShowErrorMessage(string message)
@@ -108,7 +114,11 @@ namespace FileCollector
 
             try
             {
-                MainEngine.Collect(options);
+                mainEngine.Collect(options);
+            }
+            catch (Cancellable.CancelledException)
+            {
+                errorMessage = "中断しました。";
             }
             catch (Exception exception)
             {
@@ -118,30 +128,22 @@ namespace FileCollector
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (exitRequired)
+            {
+                Close();
+                return;
+            }
+
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 ShowErrorMessage(errorMessage);
             }
             else
             {
-                string message;
-                MessageBoxIcon icon;
-
-                if (MainEngine.Cancelled)
-                {
-                    message = "中断しました。";
-                    icon = MessageBoxIcon.Warning;
-                }
-                else
-                {
-                    message = "コピーが完了しました。";
-                    icon = MessageBoxIcon.Information;
-                }
-
-                ShowMessage(message, MessageBoxButtons.OK, icon);
+                ShowMessage("コピーが完了しました。", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
-            SetEnabled(true);
+            EnableControls(true);
         }
 
         private void buttonCollect_Click(object sender, EventArgs e)
@@ -169,6 +171,16 @@ namespace FileCollector
         private void comboBoxPath_DragEnter(object sender, DragEventArgs e)
         {
             e.Effect = (e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.All : DragDropEffects.None);
+        }
+
+        private void formClosing(object sender, FormClosingEventArgs e)
+        {
+            if (backgroundWorker.IsBusy)
+            {
+                e.Cancel = true;
+                CancelCollect();
+                exitRequired = true;
+            }
         }
 
         private void load(object sender, EventArgs e)

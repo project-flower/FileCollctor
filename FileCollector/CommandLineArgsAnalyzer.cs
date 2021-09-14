@@ -13,6 +13,7 @@ namespace FileCollector
                 if (GetOption(arg, ref options)) continue;
                 if (GetOption('d', arg, ref options.Destination)) continue;
                 if (GetOption('f', arg, ref options.Filter)) continue;
+                if (GetOption('n', arg, ref options.Encoding)) continue;
                 if (GetOption('s', arg, ref options.Source)) continue;
             }
         }

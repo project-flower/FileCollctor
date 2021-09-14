@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace FileCollector
 {
-    public static class MainEngine
+    public class MainEngine : Cancellable
     {
         #region Public Classes
 
@@ -13,6 +14,7 @@ namespace FileCollector
         {
             public string Destination;
             public bool DirectoryTree;
+            public string Encoding;
             public string Filter;
             public bool Recursive;
             public bool RegExpression;
@@ -23,54 +25,54 @@ namespace FileCollector
 
         #region Private Fields
 
-        private static bool cancellationRequired = false;
-        private static bool cancelled = false;
-        private static readonly object locker = new object();
+        private PageAnalyzer pageAnalyzer = new PageAnalyzer();
 
         #endregion
 
         #region Public Properties
 
-        public static bool CancellationRequired
+        public new bool CancellationRequired
         {
             get
             {
-                bool result;
-
-                lock (locker)
-                {
-                    result = cancellationRequired;
-                }
-
-                return result;
+                return base.CancellationRequired;
             }
 
             set
             {
-                lock (locker)
-                {
-                    cancellationRequired = value;
-                }
+                pageAnalyzer.CancellationRequired = value;
+                base.CancellationRequired = value;
             }
-        }
-
-        public static bool Cancelled
-        {
-            get { return cancelled; }
         }
 
         #endregion
 
         #region Public Methods
 
-        public static void Collect(Options options)
+        public void Collect(Options options)
         {
-            cancelled = false;
+            CancellationRequired = false;
             DirectoryInfo sourceDirectoryInfo;
+            string source = options.Source;
 
             try
             {
-                sourceDirectoryInfo = new DirectoryInfo(options.Source);
+                var uri = new Uri(source);
+
+                if (uri.Port != -1)
+                {
+                    pageAnalyzer.Collect(options);
+                    return;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+
+            try
+            {
+                sourceDirectoryInfo = new DirectoryInfo(source);
             }
             catch
             {
@@ -126,8 +128,7 @@ namespace FileCollector
                 {
                     if (CancellationRequired)
                     {
-                        cancelled = true;
-                        return;
+                        throw new CancelledException();
                     }
 
                     string destFileName;
