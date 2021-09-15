@@ -2,35 +2,11 @@
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace FileCollector
 {
     public class Downloader : Cancellable
     {
-        #region Public Classes
-
-        public class DownloadResult
-        {
-            public string Address
-            {
-                get;
-            }
-
-            public string Contents
-            {
-                get;
-            }
-
-            public DownloadResult(string address, string contents)
-            {
-                Address = address;
-                Contents = contents;
-            }
-        }
-
-        #endregion
-
         #region Public Methods
 
         public Downloader()
@@ -81,25 +57,21 @@ namespace FileCollector
             }
         }
 
-        public DownloadResult DownloadPage(string address, Encoding encoding)
+        public string DownloadPage(string address, Encoding encoding)
         {
-            string contents;
-
             try
             {
                 using (WebResponse response = GetResponse(address))
                 using (Stream stream = response.GetResponseStream())
                 {
                     var reader = new StreamReader(stream, encoding);
-                    contents = reader.ReadToEnd();
+                    return reader.ReadToEnd();
                 }
             }
             catch
             {
                 throw;
             }
-
-            return new DownloadResult(address, contents);
         }
 
         #endregion

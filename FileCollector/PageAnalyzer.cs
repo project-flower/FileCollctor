@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using static FileCollector.MainEngine;
 
 namespace FileCollector
 {
@@ -36,7 +35,7 @@ namespace FileCollector
 
         #region Public Methods
 
-        public void Collect(Options options)
+        public void Collect(MainEngine.Options options)
         {
             string source = options.Source;
             string path;
@@ -57,7 +56,7 @@ namespace FileCollector
 
         #region Private Methods
 
-        private void Collect(string source, Options options, List<string> analyzedPaths)
+        private void Collect(string source, MainEngine.Options options, List<string> analyzedPaths)
         {
             CancellationRequired = true;
             Encoding encoding;
@@ -78,8 +77,7 @@ namespace FileCollector
             try
             {
                 sourceUri = new Uri(source);
-                Downloader.DownloadResult result = downloader.DownloadPage(sourceUri.ToString(), encoding);
-                contents = result.Contents;
+                contents = downloader.DownloadPage(sourceUri.ToString(), encoding);
                 sourcePath = UriManager.GetPath(sourceUri);
             }
             catch

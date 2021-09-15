@@ -192,7 +192,7 @@ namespace FileCollector
                 return;
             }
 
-            string[] args_ = new string[args.Length - 1];
+            var args_ = new string[args.Length - 1];
             Array.Copy(args, 1, args_, 0, args_.Length);
             var options = GetCurrentOptions();
             CommandLineArgsAnalyzer.Analyze(args_, ref options);
